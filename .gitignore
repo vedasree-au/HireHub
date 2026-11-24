@@ -1,0 +1,37 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+node_modules/
+dist/
+backend/.env
+backend/jobportal.db
+backend/uploads/
+backend/.pytest_cache/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Uploaded files and generated data
+backend/uploads/
+uploads/
+
+# Build files
+dist/
+build/
+
+# TypeScript generated files
+*.tsbuildinfo

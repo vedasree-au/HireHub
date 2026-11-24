@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hirehub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hirehub-local-only}
+      POSTGRES_DB: hirehub
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hirehub -d hirehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://hirehub:${POSTGRES_PASSWORD:-hirehub-local-only}@db:5432/hirehub
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in the root .env file}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - ./backend/uploads:/app/uploads
+    ports: ["8001:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    ports: ["5173:5173"]
+    environment:
+      VITE_API_URL: http://localhost:8001
+    depends_on: [backend]
+volumes:
+  postgres_data:
